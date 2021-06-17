@@ -4,6 +4,7 @@ from string import Template
 from urllib.parse import quote_plus
 from urllib.request import urlopen
 import telebot
+import yfinance as yf
 from telebot import types
 
 from util import *
@@ -138,7 +139,19 @@ def get_weather(message):
 
 
 def analyze_stock(message):
-    begin(message, "work in progress")
+    try:
+        text = message.text.split()
+        ticker = text[0]
+        first_date = text[1]
+        last_date = text[2]
+        graph = yf.download(ticker, first_date, last_date, interval='1d', progress=False)
+        plot = graph.Close.array
+        first_date_value = plot[0]
+        last_date_value = plot[-1]
+        result = "Было: " + str(first_date_value) + ", стало: " + str(last_date_value) + ", рост: " + str(last_date_value / first_date_value) + "%."
+        begin(message, result)
+    except:
+        begin(message, "Неверный тикер или неправильный интервал!")
 
 
 def answer(message):
